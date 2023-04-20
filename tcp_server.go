@@ -13,7 +13,7 @@ import (
 func main() {
 	var wg sync.WaitGroup
 
-	server, err := net.Listen("tcp", "172.17.0.2:")
+	server, err := net.Listen("tcp", "172.17.0.3:40000")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,14 +42,12 @@ func main() {
 					case "ping":
 						_, err = c.Write([]byte("pong"))
 					default:
+						kryptertMelding := mycrypt.Krypter([]rune(msg), mycrypt.ALF_SEM03, 4)
+						log.Println("Kryptert melding: ", string(kryptertMelding))
+						_, err = c.Write([]byte(string(kryptertMelding)))
+
 						dekryptertMelding := mycrypt.Krypter([]rune(string(buf[:n])), mycrypt.ALF_SEM03, len(mycrypt.ALF_SEM03)-4)
-						log.Println("Dekrypter melding: ", string(dekryptertMelding))
-						switch msg := string(dekryptertMelding); msg {
-						case "ping":
-							_, err = c.Write([]byte("pong"))
-						default:
-							_, err = c.Write([]byte(msg))
-						}
+						log.Println("Dekryptert melding: ", string(dekryptertMelding))
 					}
 					if err != nil {
 						if err != io.EOF {
@@ -63,3 +61,4 @@ func main() {
 	}()
 	wg.Wait()
 }
+	
